@@ -1,0 +1,6 @@
+{
+  "environment": {"flutter": "3.32.4", "xcode": "15.4", "simulator": "iPhone SE (3rd generation)", "ios": "17.5"},
+  "checks": {"flutter_analyze": "pass", "flutter_tests": 2, "python_tests": 2, "simulator_smoke_passed": 6},
+  "negative_control": {"url": "linkprobe://app/product/123", "expected_product_id": "999", "actual_product_id": "123", "exit_code": 1},
+  "limits": "Development validation only. No measured time savings, external adoption, or seven-day completion claim."
+}

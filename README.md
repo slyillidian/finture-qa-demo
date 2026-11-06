@@ -42,3 +42,15 @@ cd example && flutter test
 ## AI 协作与交付
 
 AI 实质参与核心 App、CLI、测试和文档的编写；人工负责范围判断与验收。JOURNAL.md 仅记录实际发生的过程，不预填未来日期。evidence/ 保存协作摘要，不能代替原始 AI 会话记录；最终需另行导出/保存真实会话及录制 30 秒～2 分钟 Demo。
+
+## 首次运行与路由约定
+
+首次打开自定义 scheme 时，模拟器可能弹出“在 Link Probe 中打开”，请在 Simulator 确认后重新执行；未确认时工具会超时失败，不会自动点击系统弹窗。示例 URL 为 `linkprobe://app/product/123`，Flutter 页面使用 `/product/123`。首版对比 URL 的 path，不验证 host 或 query 的业务语义。Flutter 的 iOS 链接生命周期参考 [官方说明](https://docs.flutter.dev/ui/navigation/deep-linking)。
+
+## 验证工具确实能失败
+
+```sh
+python3 src/link_probe.py --device <模拟器UDID> --cases cases/negative-control.json
+```
+
+该用例故意要求商品 999，但链接打开商品 123，预期退出码为 1，报告显示 product_id 不匹配并附失败截图。这是显式的反向检查，不是线上事故或真实 App 缺陷。

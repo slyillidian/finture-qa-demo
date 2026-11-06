@@ -7,13 +7,11 @@ void main() => runApp(const LinkProbeApp());
 Map<String, String> resolveLink(String route) {
   final uri = Uri.tryParse(route);
   if (route == '/') return {'screen': 'home'};
-  if (uri == null || uri.scheme != 'linkprobe') {
-    return {'screen': 'error', 'reason': 'unknown_route'};
-  }
-  if (uri.host == 'product') {
-    if (uri.pathSegments.length == 1 &&
-        RegExp(r'^[1-9][0-9]*$').hasMatch(uri.pathSegments.first)) {
-      return {'screen': 'product_detail', 'product_id': uri.pathSegments.first};
+  if (uri == null) return {'screen': 'error', 'reason': 'unknown_route'};
+  if (uri.pathSegments.isNotEmpty && uri.pathSegments.first == 'product') {
+    if (uri.pathSegments.length == 2 &&
+        RegExp(r'^[1-9][0-9]*$').hasMatch(uri.pathSegments.last)) {
+      return {'screen': 'product_detail', 'product_id': uri.pathSegments.last};
     }
     return {'screen': 'error', 'reason': 'invalid_product_id'};
   }
@@ -85,7 +83,7 @@ class _ProbePageState extends State<ProbePage> {
             if (state['reason'] != null) Text('Reason: ${state['reason']}'),
             const SizedBox(height: 24),
             const Text(
-              'Try linkprobe://product/123 from the regression runner.',
+              'Try linkprobe://app/product/123 from the regression runner.',
             ),
             if (const bool.fromEnvironment('QA_PROBE'))
               const Text('QA observation enabled · test build only'),

@@ -11,13 +11,13 @@ spec.loader.exec_module(probe)
 
 class CasesTest(unittest.TestCase):
     def test_wrong_product_and_stale_route_fail(self):
-        case = {'url': 'linkprobe://product/456', 'expect': {'screen': 'product_detail', 'product_id': '456'}}
-        actual = {'route': 'linkprobe://product/123', 'screen': 'product_detail', 'product_id': '123'}
+        case = {'url': 'linkprobe://app/product/456', 'expect': {'screen': 'product_detail', 'product_id': '456'}}
+        actual = {'route': '/product/123', 'screen': 'product_detail', 'product_id': '123'}
         self.assertEqual(set(probe.mismatches(case, actual)), {'route', 'product_id'})
-        self.assertEqual(probe.mismatches(case, {**case['expect'], 'route': case['url']}), {})
+        self.assertEqual(probe.mismatches(case, {**case['expect'], 'route': '/product/456'}), {})
 
     def test_reject_bad_input_before_simulator_commands(self):
-        valid = {'name': 'test', 'url': 'linkprobe://product/1', 'launch': 'cold', 'expect': {'screen': 'product_detail'}}
+        valid = {'name': 'test', 'url': 'linkprobe://app/product/1', 'launch': 'cold', 'expect': {'screen': 'product_detail'}}
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / 'cases.json'
             for cases in [[], [valid, valid], [{**valid, 'launch': 'other'}],

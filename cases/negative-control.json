@@ -1,0 +1,1 @@
+[{"name": "negative control: wrong expected product", "url": "linkprobe://app/product/123", "launch": "cold", "expect": {"screen": "product_detail", "product_id": "999"}}]

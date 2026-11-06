@@ -41,7 +41,7 @@ def load_cases(path):
 
 
 def mismatches(case, actual):
-    expected = {**case['expect'], 'route': case['url']}
+    expected = {**case['expect'], 'route': urlparse(case['url']).path or '/'}
     return {key: {'expected': value, 'actual': actual.get(key)}
             for key, value in expected.items() if actual.get(key) != value}
 
@@ -89,7 +89,7 @@ class Simulator:
                         observed = json.loads(state_file.read_text())
                         if isinstance(observed, dict):
                             actual = observed
-                            if observed.get('route') == case['url']:
+                            if observed.get('route') == (urlparse(case['url']).path or '/'):
                                 break
                     except (FileNotFoundError, json.JSONDecodeError):
                         pass
