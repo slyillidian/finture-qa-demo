@@ -1,0 +1,28 @@
+{
+  "scenario": "Fresh temporary iOS 17.5 Simulator: URL confirmation handled automatically",
+  "first_case": {
+    "name": "cold product 123",
+    "url": "linkprobe://app/product/123",
+    "launch": "cold",
+    "expected": {
+      "screen": "product_detail",
+      "product_id": "123"
+    },
+    "passed": true,
+    "alert_handling": "opened",
+    "actual": {
+      "screen": "product_detail",
+      "product_id": "123",
+      "route": "/product/123"
+    },
+    "mismatches": {},
+    "seconds": 16.213
+  },
+  "smoke_passed": 6,
+  "authorized_rerun_passed": 6,
+  "negative_control_exit_code": 1,
+  "final_helper_without_alert": "not_present",
+  "swift_title_checks": "pass: expected Chinese/English; rejects another app and photo permission title",
+  "python_tests": 3,
+  "scope": "Observed on Xcode 15.4 / iOS 17.5 only; no claim of all locales or OS versions"
+}

@@ -4,12 +4,57 @@ import argparse
 from datetime import datetime
 import json
 import math
+import plistlib
 from pathlib import Path
 import subprocess
 import sys
 import time
 import uuid
 from urllib.parse import urlparse
+
+
+class AlertHelper:
+    """Lazy XCUITest fallback; normal successful links never start UI testing."""
+    def __init__(self, device, app_name, directory):
+        self.device, self.app_name, self.directory = device, app_name, directory
+        self.products = Path(__file__).resolve().parents[1] / 'work/alert-helper/Build/Products'
+        self.built = False
+
+    def command(self, args, log_path):
+        with log_path.open('w') as log:
+            result = subprocess.run(['xcodebuild', *args], stdout=log,
+                                    stderr=subprocess.STDOUT, timeout=120)
+        if result.returncode:
+            raise RuntimeError(f'Alert helper failed; see {log_path}')
+        return log_path.read_text()
+
+    def handle(self, index):
+        root = Path(__file__).resolve().parents[1]
+        destination = f'platform=iOS Simulator,id={self.device}'
+        if not self.built:
+            self.command(['build-for-testing', '-project', str(root / 'ios/AlertHelper/AlertHelper.xcodeproj'),
+                          '-scheme', 'AlertHelper', '-destination', destination,
+                          '-derivedDataPath', str(root / 'work/alert-helper'), 'CODE_SIGNING_ALLOWED=NO'],
+                         self.directory / 'alert-build.log')
+            self.built = True
+        originals = [p for p in self.products.glob('*.xctestrun') if p.name != 'configured.xctestrun']
+        if len(originals) != 1:
+            raise RuntimeError('Expected one alert-helper xctestrun; remove work/alert-helper and retry')
+        settings = plistlib.loads(originals[0].read_bytes())
+        for key, target in settings.items():
+            if key != '__xctestrun_metadata__':
+                target.setdefault('EnvironmentVariables', {})['LP_EXPECTED_APP_NAME'] = self.app_name
+        # Keep beside the original: xctestrun resolves paths relative to __TESTROOT__.
+        configured = self.products / 'configured.xctestrun'
+        configured.write_bytes(plistlib.dumps(settings))
+        log = self.command(['test-without-building', '-xctestrun', str(configured),
+                            '-destination', destination, '-parallel-testing-enabled', 'NO',
+                            '-resultBundlePath', str(self.directory / f'{index:02d}-alert.xcresult')],
+                           self.directory / f'{index:02d}-alert.log')
+        for status in ('opened', 'not_present'):
+            if f'LINK_PROBE_ALERT:{status}' in log:
+                return status
+        raise RuntimeError('Alert helper returned no recognized outcome')
 
 
 def load_cases(path):
@@ -47,9 +92,10 @@ def mismatches(case, actual):
 
 
 class Simulator:
-    def __init__(self, device, bundle, directory):
+    def __init__(self, device, bundle, directory, alert_helper=None):
         self.device, self.bundle, self.directory = device, bundle, directory
         self.log = []
+        self.alert_helper = alert_helper
 
     def call(self, *args, allow_failure=False):
         result = subprocess.run(['xcrun', 'simctl', *args], capture_output=True,
@@ -83,6 +129,8 @@ class Simulator:
                 state_file.unlink(missing_ok=True)
                 self.call('openurl', self.device, case['url'])
                 deadline = time.monotonic() + case.get('timeout_seconds', 10)
+                alert_check_at = time.monotonic() + 1.5
+                checked_alert = False
                 actual = None
                 while time.monotonic() < deadline:
                     try:
@@ -93,19 +141,28 @@ class Simulator:
                                 break
                     except (FileNotFoundError, json.JSONDecodeError):
                         pass
+                    if self.alert_helper and not checked_alert and time.monotonic() >= alert_check_at:
+                        checked_alert = True
+                        helper_start = time.monotonic()
+                        result['alert_handling'] = self.alert_helper.handle(index)
+                        # Preserve the page timeout; helper build/test startup is separate overhead.
+                        deadline += time.monotonic() - helper_start
                     time.sleep(.1)
                 if actual is None:
-                    result['error'] = 'No page observation before timeout. Is QA_PROBE enabled?'
+                    result['error'] = 'No page observation before timeout. Check QA_PROBE and system alerts.'
                 else:
                     result['actual'] = actual
                     result['mismatches'] = mismatches(case, actual)
                     result['passed'] = not result['mismatches']
-                if not result['passed']:
+            except (OSError, RuntimeError, subprocess.TimeoutExpired) as exc:
+                result['error'] = str(exc)
+            if not result['passed']:
+                try:
                     screenshot = self.directory / f'{index:02d}-failure.png'
                     self.call('io', self.device, 'screenshot', str(screenshot))
                     result['screenshot'] = screenshot.name
-            except (OSError, RuntimeError, subprocess.TimeoutExpired) as exc:
-                result['error'] = str(exc)
+                except (OSError, RuntimeError, subprocess.TimeoutExpired) as exc:
+                    result['screenshot_error'] = str(exc)
             result['seconds'] = round(time.monotonic() - start, 3)
             results.append(result)
             print(f"{'PASS' if result['passed'] else 'FAIL'} {case['name']}")
@@ -118,6 +175,9 @@ def main():
     parser.add_argument('--bundle', default='dev.sly.linkProbe')
     parser.add_argument('--cases', default='cases/smoke.json')
     parser.add_argument('--output', default='reports')
+    parser.add_argument('--alert-policy', choices=('auto', 'manual'), default='auto',
+                        help='auto: handle only the named app URL confirmation via XCUITest')
+    parser.add_argument('--app-name', default='Link Probe', help='exact display name in URL confirmation')
     args = parser.parse_args()
     simulator = None
     directory = None
@@ -125,7 +185,10 @@ def main():
         cases = load_cases(args.cases)
         directory = Path(args.output).resolve() / (datetime.now().strftime('%Y%m%d-%H%M%S') + '-' + uuid.uuid4().hex[:6])
         directory.mkdir(parents=True)
-        simulator = Simulator(args.device, args.bundle, directory)
+        if not args.app_name.strip():
+            raise ValueError('--app-name must not be empty')
+        helper = AlertHelper(args.device, args.app_name, directory) if args.alert_policy == 'auto' else None
+        simulator = Simulator(args.device, args.bundle, directory, helper)
         results = simulator.run(cases)
         (directory / 'results.json').write_text(json.dumps(results, indent=2, ensure_ascii=False))
         lines = ['# Link Probe report', '']
