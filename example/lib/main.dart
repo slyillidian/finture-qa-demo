@@ -1,122 +1,97 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+void main() => runApp(const LinkProbeApp());
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
+Map<String, String> resolveLink(String route) {
+  final uri = Uri.tryParse(route);
+  if (route == '/') return {'screen': 'home'};
+  if (uri == null || uri.scheme != 'linkprobe') {
+    return {'screen': 'error', 'reason': 'unknown_route'};
   }
+  if (uri.host == 'product') {
+    if (uri.pathSegments.length == 1 &&
+        RegExp(r'^[1-9][0-9]*$').hasMatch(uri.pathSegments.first)) {
+      return {'screen': 'product_detail', 'product_id': uri.pathSegments.first};
+    }
+    return {'screen': 'error', 'reason': 'invalid_product_id'};
+  }
+  return {'screen': 'error', 'reason': 'unknown_route'};
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+class LinkProbeApp extends StatelessWidget {
+  const LinkProbeApp({super.key});
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+  Route<void> route(RouteSettings settings) => MaterialPageRoute(
+    settings: settings,
+    builder: (_) => ProbePage(route: settings.name ?? '/'),
+  );
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  Widget build(BuildContext context) => MaterialApp(
+    title: 'Link Probe',
+    theme: ThemeData(colorSchemeSeed: Colors.indigo, useMaterial3: true),
+    onGenerateInitialRoutes: (name) => [route(RouteSettings(name: name))],
+    onGenerateRoute: route,
+  );
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class ProbePage extends StatefulWidget {
+  const ProbePage({super.key, required this.route});
+  final String route;
+  @override
+  State<ProbePage> createState() => _ProbePageState();
+}
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+class _ProbePageState extends State<ProbePage> {
+  @override
+  void initState() {
+    super.initState();
+    if (const bool.fromEnvironment('QA_PROBE')) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
+        final path = '${Directory.systemTemp.path}/link-probe-state.json';
+        final temporary = File('$path.next');
+        await temporary.writeAsString(
+          jsonEncode({...resolveLink(widget.route), 'route': widget.route}),
+        );
+        await temporary.rename(path);
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    final state = resolveLink(widget.route);
+    final screen = state['screen'];
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
+      appBar: AppBar(title: const Text('Link Probe · Demo')),
+      body: Padding(
+        padding: const EdgeInsets.all(24),
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             Text(
-              '$_counter',
+              screen == 'home'
+                  ? 'Home'
+                  : screen == 'product_detail'
+                  ? 'Product ${state['product_id']}'
+                  : 'Invalid link',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
+            const SizedBox(height: 16),
+            Text('Route: ${widget.route}'),
+            if (state['reason'] != null) Text('Reason: ${state['reason']}'),
+            const SizedBox(height: 24),
+            const Text(
+              'Try linkprobe://product/123 from the regression runner.',
+            ),
+            if (const bool.fromEnvironment('QA_PROBE'))
+              const Text('QA observation enabled · test build only'),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

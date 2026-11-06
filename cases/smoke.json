@@ -1,0 +1,8 @@
+[
+  {"name":"cold product 123","url":"linkprobe://product/123","launch":"cold","expect":{"screen":"product_detail","product_id":"123"}},
+  {"name":"warm product 456","url":"linkprobe://product/456","launch":"warm","expect":{"screen":"product_detail","product_id":"456"}},
+  {"name":"warm repeat product","url":"linkprobe://product/456","launch":"warm","expect":{"screen":"product_detail","product_id":"456"}},
+  {"name":"cold missing ID","url":"linkprobe://product","launch":"cold","expect":{"screen":"error","reason":"invalid_product_id"}},
+  {"name":"warm malformed ID","url":"linkprobe://product/abc","launch":"warm","expect":{"screen":"error","reason":"invalid_product_id"}},
+  {"name":"warm unknown route","url":"linkprobe://unknown","launch":"warm","expect":{"screen":"error","reason":"unknown_route"}}
+]
