@@ -13,7 +13,7 @@
 
 ## 环境
 
-macOS、完整 Xcode（含 iOS Simulator runtime）、Flutter、Python 3.10+。CLI 只使用 Python 标准库。默认 Bundle ID 为 dev.sly.linkProbe。
+macOS、完整 Xcode（含 iOS Simulator runtime）、Flutter、Python 3.9+。CLI 只使用 Python 标准库。默认 Bundle ID 为 dev.sly.linkProbe。
 
 ```sh
 export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
@@ -115,3 +115,29 @@ python3 src/link_probe.py --device <模拟器UDID> --cases cases/ui-negative-con
 `.xcresult` 是 Xcode 的原始测试结果包，不是供文本编辑器阅读的目录。它保留 XCTest 执行详情、失败诊断、附件截图，UI 断言失败时还保留 UI 层级。需要深入排查时可在 macOS 终端执行 `open /完整路径/01-ui.xcresult`，由 Xcode 查看；平时直接阅读 Markdown、JSON、PNG 和 `.log` 即可。当前保留 xcresult 作为诊断证据；生成报告目录已被 Git 忽略，旧运行目录可按需自行清理。
 
 独立 PNG 是检查结束时的设备画面，xcresult 附件是测试内部采集的证据，拍摄时间可能不同。文本断言通过仍可能存在布局、图片或遮挡问题，需要人工查看截图。
+
+## 交付材料导航
+
+- [评审导读](docs/REVIEW_GUIDE.md)：问题、验证路径、证据与能力边界。
+- [开发记录](JOURNAL.md)：实际尝试、失败和取舍，不编造未发生的日程。
+- [Demo 录制脚本](docs/DEMO_SCRIPT.md)：正常用例、失败断言与人工截图复核。
+- [换个角色思考](docs/ROLE_REFLECTION.md)：AI 协作撰写，提交者最终审阅。
+- [提交检查表](docs/SUBMISSION_CHECKLIST.md)：明确区分已完成和需本人确认的内容。
+- 原始 AI 对话文本和视频作为单独附件交付；仓库内 SESSION_NOTES 只是摘要，不能代替原始记录。
+
+## VS Code 与常见环境问题
+
+本仓库根目录不是 Flutter 包，Flutter 工程在 `example/`。使用 VS Code 打开根目录时，运行配置应设置 `cwd` 为 `${workspaceFolder}/example`、`program` 为 `${workspaceFolder}/example/lib/main.dart`，并使用 Flutter 调试器。`toolArgs` 中保留 `--dart-define=QA_PROBE=true`。
+
+若出现 `Unrecognized flags: dart_define`，先核对是否误用 Dart VM 调试器；本机扩展支持在配置中显式指定 `debuggerType: flutter`。若依赖提示 Dart 3.3.4 不满足要求，请选择 Flutter 3.32.4（自带 Dart 3.8.1）或另行验证的兼容 SDK，不盲目降低 pubspec 约束。
+
+模拟器已启动但 VS Code 没有设备时，区分系统工具目录与后台 Flutter daemon 的环境：终端用 `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer flutter devices` 验证；必要时在本项目的本地 VS Code settings 设置同一个 `dart.env.DEVELOPER_DIR`，然后重新加载窗口。不要通过写死一个设备 ID 掩盖发现失败。SDK 绝对路径属于本机配置，提交者的 settings.json 不作为可移植配置发布。
+
+已验证环境：Flutter 3.32.4 / Dart 3.8.1、Xcode 15.4、iOS 17.5 模拟器。其他版本不保证未经验证直接可用。
+
+
+## AI 工具与时间范围
+
+实际使用 ChatGPT 桌面版中的 Codex 编码工作流及 IDE 协作；本地会话元数据标识为 Codex Desktop，不声称实际使用了 Codex CLI。OpenAI [官方变更说明](https://learn.chatgpt.com/docs/whats-new)记载 Codex app 已并入 ChatGPT 桌面版。开发从 2026-11-05 开始，计划 11 月 9 日提前交付，提交者已确认允许提前提交。JOURNAL 以真实阶段总结收尾，没有编造自然第 7 天经历。
+
+完整附件清单与核对方式见 [docs/DELIVERY.md](docs/DELIVERY.md)。
