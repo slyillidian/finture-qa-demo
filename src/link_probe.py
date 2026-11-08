@@ -207,17 +207,34 @@ class Simulator:
                         'probe_failed' if 'ui' in case else 'not_requested'}
             except (OSError, RuntimeError, subprocess.TimeoutExpired) as exc:
                 result['error'] = str(exc)
-            if not result['passed']:
-                try:
-                    screenshot = self.directory / f'{index:02d}-failure.png'
-                    self.call('io', self.device, 'screenshot', str(screenshot))
-                    result['screenshot'] = screenshot.name
-                except (OSError, RuntimeError, subprocess.TimeoutExpired) as exc:
-                    result['screenshot_error'] = str(exc)
+            # Capture every case before the next case changes the screen.
+            try:
+                suffix = 'pass' if result['passed'] else 'failure'
+                screenshot = self.directory / f'{index:02d}-{suffix}.png'
+                self.call('io', self.device, 'screenshot', str(screenshot))
+                result['screenshot'] = screenshot.name
+            except (OSError, RuntimeError, subprocess.TimeoutExpired) as exc:
+                result['screenshot_error'] = str(exc)
             result['seconds'] = round(time.monotonic() - start, 3)
             results.append(result)
             print(f"{'PASS' if result['passed'] else 'FAIL'} {case['name']}")
         return results
+
+
+def render_report(results):
+    passed = sum(r['passed'] for r in results)
+    lines = ['# Link Probe report', '',
+             f"Total: {len(results)} · PASS: {passed} · FAIL: {len(results) - passed}", '',
+             'Screenshots are captured after checks, before the next case. '
+             'Passing assertions do not guarantee correct visual layout.', '']
+    for r in results:
+        lines.extend([f"## {'PASS' if r['passed'] else 'FAIL'}: {r['name']}", ''])
+        if r.get('screenshot'):
+            lines.extend([f"![Case screenshot]({r['screenshot']})", ''])
+        elif r.get('screenshot_error'):
+            lines.extend(['**Screenshot unavailable** — see screenshot_error below.', ''])
+        lines.extend(['```json', json.dumps(r, ensure_ascii=False, indent=2), '```', ''])
+    return '\n'.join(lines)
 
 
 def main():
@@ -243,11 +260,7 @@ def main():
         simulator = Simulator(args.device, args.bundle, directory, helper, ui_helper)
         results = simulator.run(cases)
         (directory / 'results.json').write_text(json.dumps(results, indent=2, ensure_ascii=False))
-        lines = ['# Link Probe report', '']
-        for r in results:
-            lines.extend([f"## {'PASS' if r['passed'] else 'FAIL'}: {r['name']}", '',
-                          '```json', json.dumps(r, ensure_ascii=False, indent=2), '```', ''])
-        (directory / 'report.md').write_text('\n'.join(lines))
+        (directory / 'report.md').write_text(render_report(results))
         print(f'Report: {directory}')
         return 0 if all(r['passed'] for r in results) else 1
     except (OSError, ValueError, RuntimeError, subprocess.TimeoutExpired) as exc:

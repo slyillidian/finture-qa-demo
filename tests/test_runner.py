@@ -65,8 +65,9 @@ class CasesTest(unittest.TestCase):
                     helper.handle.assert_not_called()
                 else:
                     helper.handle.assert_called_once_with(1)
-                if not result['passed']:
-                    self.assertIn('screenshot', result)
+                self.assertIn('screenshot', result)
+                expected_suffix = 'pass.png' if result['passed'] else 'failure.png'
+                self.assertTrue(result['screenshot'].endswith(expected_suffix))
 
     def test_ui_failure_or_helper_error_cannot_pass_correct_probe(self):
         case = {'name': 'UI product', 'url': 'linkprobe://app/product/123', 'launch': 'cold',
@@ -117,6 +118,19 @@ class CasesTest(unittest.TestCase):
                 path.write_text(json.dumps([{**case, 'ui': assertions}]))
                 with self.assertRaises(ValueError):
                     probe.load_cases(path)
+
+    def test_report_embeds_all_screenshots_and_marks_capture_errors(self):
+        results = [
+            {'name': 'success', 'passed': True, 'screenshot': '01-pass.png'},
+            {'name': 'failure', 'passed': False, 'screenshot': '02-failure.png'},
+            {'name': 'capture error', 'passed': True, 'screenshot_error': 'device disconnected'},
+        ]
+        report = probe.render_report(results)
+        self.assertIn('![Case screenshot](01-pass.png)', report)
+        self.assertIn('![Case screenshot](02-failure.png)', report)
+        self.assertIn('Screenshot unavailable', report)
+        self.assertIn('device disconnected', report)
+        self.assertIn('PASS: 2 · FAIL: 1', report)
 
 
 if __name__ == '__main__':

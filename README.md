@@ -8,7 +8,7 @@
 
 - iOS Simulator、Flutter 示例 App、自定义 URL scheme。
 - 冷启动与运行中链接；验证页面及商品 ID。
-- JSON 用例、结果报告、失败截图。
+- JSON 用例、结果报告、每条用例截图（成功与失败均保留）。
 - 独立 XCUITest 检查可见 UI 文本与可访问性标识。
 
 ## 环境
@@ -96,7 +96,7 @@ python3 src/link_probe.py --device <模拟器UDID> --alert-policy manual
 - XCUITest 不主动 launch/activate App，不改变待验证的冷启动/运行中跳转结果；它独立查询当前原生 UI 树。检查要求 App 在前台，匹配元素恰好一个，且 `isHittable` 为真。
 - 错误页同时检查 `qa.title` 的 `Invalid link` 和 `qa.reason` 的具体原因。断言列表非空、标识唯一；本版不支持滚动查找、模糊匹配或任意 UI 操作。
 - 报告新增 `probe_passed` 和 `ui_assertions`，记录预期文本、实际文本、匹配数量、可交互状态。探针失败时 UI 检查标为 `probe_failed`；UI 测试异常时用例失败，不能退回探针结果算通过。
-- 每条 UI 检查写入 `NN-ui.log` 和 `NN-ui.xcresult`；xcresult 包含截图，失败时附 UI 层级。用例失败时同时保存顶层 `NN-failure.png`。
+- 每条 UI 检查写入 `NN-ui.log` 和 `NN-ui.xcresult`；xcresult 包含截图，失败时附 UI 层级。每条用例结束后同时保存顶层 PNG：通过为 `NN-pass.png`，失败为 `NN-failure.png`。
 - 每条用例启动一次 XCTest 会话，有明显额外耗时；首版优先确保断言独立可靠，尚未优化成常驻会话。`--alert-policy manual` 仅禁用自动点击系统弹窗，不禁用配置的 UI 断言。
 
 UI 反向检查（探针期望正确，故意要求错误页面标题，预期退出码 1）：
@@ -106,3 +106,12 @@ python3 src/link_probe.py --device <模拟器UDID> --cases cases/ui-negative-con
 ```
 
 这是明确标注的错误预期，用于验证断言路径；开发验证还临时构建了“UI 显示 999、探针报告 123”的渲染错误版本，记录见 JOURNAL.md。故障代码未保留在正式源文件中。
+
+
+## 日常查看截图与原始诊断包
+
+每条用例在检查结束后、下一条执行前，保存独立 PNG；成功和失败均截图。打开 `report.md` 的 Markdown 预览即可逐条查看截图，`results.json` 的 `screenshot` 为相对文件名。截图失败单独记录为 `screenshot_error`，报告明确提示缺失；截图本身不改变已有的自动断言结果。历史报告不会自动补图，需重新执行。
+
+`.xcresult` 是 Xcode 的原始测试结果包，不是供文本编辑器阅读的目录。它保留 XCTest 执行详情、失败诊断、附件截图，UI 断言失败时还保留 UI 层级。需要深入排查时可在 macOS 终端执行 `open /完整路径/01-ui.xcresult`，由 Xcode 查看；平时直接阅读 Markdown、JSON、PNG 和 `.log` 即可。当前保留 xcresult 作为诊断证据；生成报告目录已被 Git 忽略，旧运行目录可按需自行清理。
+
+独立 PNG 是检查结束时的设备画面，xcresult 附件是测试内部采集的证据，拍摄时间可能不同。文本断言通过仍可能存在布局、图片或遮挡问题，需要人工查看截图。
