@@ -51,4 +51,54 @@ final class AlertHelper: XCTestCase {
         XCTAssertFalse(alert.waitForExistence(timeout: 0.5), "URL confirmation did not disappear")
         print("LINK_PROBE_ALERT:opened")
     }
+
+    func testAssertUI() throws {
+        continueAfterFailure = false
+        let env = ProcessInfo.processInfo.environment
+        guard let bundle = env["LP_BUNDLE_ID"], !bundle.isEmpty,
+              let encoded = env["LP_UI_ASSERTIONS"], let data = encoded.data(using: .utf8),
+              let assertions = try JSONSerialization.jsonObject(with: data) as? [[String: String]],
+              !assertions.isEmpty else {
+            XCTFail("Missing UI assertion configuration")
+            return
+        }
+        let app = XCUIApplication(bundleIdentifier: bundle)
+        // Do not launch/activate: doing so would alter the scenario being tested.
+        let timeout = Double(env["LP_UI_TIMEOUT"] ?? "10") ?? 10
+        let deadline = Date().addingTimeInterval(timeout)
+        var checks: [[String: Any]] = []
+        var passed = false
+        repeat {
+            checks = assertions.map { expected in
+                let id = expected["id"] ?? ""
+                let label = expected["label"] ?? ""
+                let matches = app.descendants(matching: .any).matching(identifier: id)
+                let count = matches.count
+                let element = matches.firstMatch
+                let actual = count == 1 ? element.label : ""
+                let visible = count == 1 && element.isHittable
+                return ["id": id, "expected_label": label, "actual_label": actual,
+                        "matches": count, "hittable": visible,
+                        "passed": visible && actual == label]
+            }
+            passed = app.state == .runningForeground && checks.allSatisfy { $0["passed"] as? Bool == true }
+            if passed || Date() >= deadline { break }
+            Thread.sleep(forTimeInterval: 0.2)
+        } while true
+        let attachment = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        attachment.name = "UI assertion screenshot"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+        if !passed {
+            let tree = XCTAttachment(string: app.debugDescription)
+            tree.name = "UI hierarchy on assertion failure"
+            tree.lifetime = .keepAlways
+            add(tree)
+        }
+        let result: [String: Any] = ["passed": passed, "app_foreground": app.state == .runningForeground,
+                                     "checks": checks]
+        let json = try JSONSerialization.data(withJSONObject: result, options: [.sortedKeys])
+        print("LINK_PROBE_UI:" + String(data: json, encoding: .utf8)!)
+        XCTAssertTrue(passed, "Visible UI does not match expectations; see structured result and attachments")
+    }
 }

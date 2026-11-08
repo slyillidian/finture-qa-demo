@@ -9,6 +9,7 @@
 - iOS Simulator、Flutter 示例 App、自定义 URL scheme。
 - 冷启动与运行中链接；验证页面及商品 ID。
 - JSON 用例、结果报告、失败截图。
+- 独立 XCUITest 检查可见 UI 文本与可访问性标识。
 
 ## 环境
 
@@ -37,7 +38,7 @@ cd example && flutter test
 
 测试构建在页面完成首帧回调后，向沙盒 tmp/link-probe-state.json 原子写入页面、业务参数及收到的路由。CLI 清除旧状态，发送链接并等待新状态，核对路由和预期字段。QA_PROBE 默认关闭；请勿将探针作为正式业务接口。
 
-这证明测试探针所报告的页面状态符合预期，不证明所有像素、交互、数据加载或真实用户体验正确；截图仅辅助人工检查。首版不支持 Android、真机、Universal Links、登录自动化、并发运行和任意第三方 App。接入其他项目需要在目标页面就绪时提供同一格式的状态文件，不能仅在收到链接时报告成功。
+用例配置 `ui` 后，探针与原生 UI 断言都必须通过：UI 断言检查 App 处于前台，标识对应元素唯一、可交互且文本一致。它不证明所有像素、布局、交互、数据加载或真实用户体验正确；截图辅助人工检查。未配置 `ui` 的旧用例仍仅检查探针，报告明确标为 `not_requested`。首版不支持 Android、真机、Universal Links、登录自动化、并发运行和任意第三方 App。接入其他项目需要在目标页面就绪时提供同一格式的状态文件，不能仅在收到链接时报告成功。
 
 ## AI 协作与交付
 
@@ -69,9 +70,39 @@ python3 src/link_probe.py --device <模拟器UDID> --alert-policy manual
 ```
 
 - 当前匹配简体中文及英文的已知 URL 打开确认标题，未知语言/文案会保留失败证据，不猜测按钮。
-- 正常快速到达目标页面时，不启动 XCUITest。慢启动或路由异常也可能触发一次检查；没有弹窗时会继续等待页面。
+- 正常快速到达目标页面时，不启动弹窗检查；配置了 `ui` 的用例仍会启动独立 UI 检查。慢启动或路由异常也可能触发一次弹窗检查；没有弹窗时会继续等待页面。
 - 第一次触发辅助程序会增加构建/测试启动耗时，本机真实首次确认用例约 16 秒。页面等待时间不包含辅助程序耗时；每个辅助构建/测试命令各有 120 秒上限。
 - 报告中的 `alert_handling` 为 `opened` 或 `not_present`；辅助错误记录在 `error`。构建日志为 `alert-build.log`，每条检查的日志为 `NN-alert.log`，截图附件位于 `NN-alert.xcresult`，可通过 Xcode 打开。最终页面不符合预期仍然失败。
 - 不支持并发运行（共享辅助构建缓存位于 `work/alert-helper`）；切换 Xcode/runtime 后如缓存异常，可删除这个生成目录后重跑。
 
 实现使用 Apple 的 [XCUIAutomation](https://developer.apple.com/documentation/xcuiautomation) 访问系统弹窗；不预写授权、不修改系统安全配置。
+
+
+## UI 断言（需要重新构建并安装示例 App）
+
+`cases/smoke.json` 的 6 条用例现已包含 UI 断言。命令不变，但必须按上面的构建/安装步骤更新 App；旧构建没有 `qa.title` / `qa.reason` 标识，会报 UI 断言失败。
+
+```json
+{
+  "name": "cold product 123",
+  "url": "linkprobe://app/product/123",
+  "launch": "cold",
+  "expect": {"screen": "product_detail", "product_id": "123"},
+  "ui": [{"id": "qa.title", "label": "Product 123"}]
+}
+```
+
+- `id` 为 Flutter `Semantics(identifier: ...)` 导出的原生可访问性标识；`label` 为实际可见 Text 导出的精确文本，不是探针值。标识不携带商品编号，避免把预期藏在标识中。
+- XCUITest 不主动 launch/activate App，不改变待验证的冷启动/运行中跳转结果；它独立查询当前原生 UI 树。检查要求 App 在前台，匹配元素恰好一个，且 `isHittable` 为真。
+- 错误页同时检查 `qa.title` 的 `Invalid link` 和 `qa.reason` 的具体原因。断言列表非空、标识唯一；本版不支持滚动查找、模糊匹配或任意 UI 操作。
+- 报告新增 `probe_passed` 和 `ui_assertions`，记录预期文本、实际文本、匹配数量、可交互状态。探针失败时 UI 检查标为 `probe_failed`；UI 测试异常时用例失败，不能退回探针结果算通过。
+- 每条 UI 检查写入 `NN-ui.log` 和 `NN-ui.xcresult`；xcresult 包含截图，失败时附 UI 层级。用例失败时同时保存顶层 `NN-failure.png`。
+- 每条用例启动一次 XCTest 会话，有明显额外耗时；首版优先确保断言独立可靠，尚未优化成常驻会话。`--alert-policy manual` 仅禁用自动点击系统弹窗，不禁用配置的 UI 断言。
+
+UI 反向检查（探针期望正确，故意要求错误页面标题，预期退出码 1）：
+
+```sh
+python3 src/link_probe.py --device <模拟器UDID> --cases cases/ui-negative-control.json
+```
+
+这是明确标注的错误预期，用于验证断言路径；开发验证还临时构建了“UI 显示 999、探针报告 123”的渲染错误版本，记录见 JOURNAL.md。故障代码未保留在正式源文件中。

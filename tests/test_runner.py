@@ -68,6 +68,56 @@ class CasesTest(unittest.TestCase):
                 if not result['passed']:
                     self.assertIn('screenshot', result)
 
+    def test_ui_failure_or_helper_error_cannot_pass_correct_probe(self):
+        case = {'name': 'UI product', 'url': 'linkprobe://app/product/123', 'launch': 'cold',
+                'expect': {'screen': 'product_detail', 'product_id': '123'},
+                'ui': [{'id': 'qa.title', 'label': 'Product 123'}]}
+        for outcome in ('pass', 'mismatch', 'error'):
+            with self.subTest(outcome=outcome), tempfile.TemporaryDirectory() as folder:
+                directory = Path(folder)
+                (directory / 'tmp').mkdir()
+                def call(*args, **kwargs):
+                    if args[0] == 'list':
+                        return json.dumps({'devices': {'ios': [{'udid': 'device', 'state': 'Booted'}]}})
+                    if args[0] == 'get_app_container':
+                        return str(directory)
+                    if args[0] == 'openurl':
+                        (directory / 'tmp/link-probe-state.json').write_text(json.dumps({
+                            **case['expect'], 'route': '/product/123'}))
+                    return ''
+                helper = Mock()
+                helper.assert_ui = Mock()
+                if outcome == 'error':
+                    helper.assert_ui.side_effect = RuntimeError('UI helper failed')
+                else:
+                    helper.assert_ui.return_value = {'passed': outcome == 'pass', 'checks': []}
+                simulator = probe.Simulator('device', 'bundle', directory, ui_helper=helper)
+                simulator.call = Mock(side_effect=call)
+                result = simulator.run([case])[0]
+                self.assertTrue(result['probe_passed'])
+                self.assertEqual(result['passed'], outcome == 'pass')
+                helper.assert_ui.assert_called_once()
+
+    def test_ui_result_requires_successful_xctest_session(self):
+        helper = probe.AlertHelper('device', 'name', Path('/tmp'))
+        for log in ('', 'LINK_PROBE_UI:{"passed":true}', 'LINK_PROBE_UI:{"passed":"yes"}'):
+            helper.run_test = Mock(return_value=log)
+            with self.assertRaises(RuntimeError):
+                helper.assert_ui(1, 'bundle', [], 10)
+        helper.run_test = Mock(return_value='LINK_PROBE_UI:{"passed":false,"checks":[]}')
+        self.assertFalse(helper.assert_ui(1, 'bundle', [], 10)['passed'])
+
+    def test_invalid_ui_config_is_rejected(self):
+        case = {'name': 'test', 'url': 'linkprobe://app/product/123', 'launch': 'cold',
+                'expect': {'screen': 'product_detail'}}
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / 'cases.json'
+            for assertions in ([], {}, [{'id': 'qa.title'}], [{'id': 'x', 'label': ''}],
+                               [{'id': 'x', 'label': 'a'}, {'id': 'x', 'label': 'b'}]):
+                path.write_text(json.dumps([{**case, 'ui': assertions}]))
+                with self.assertRaises(ValueError):
+                    probe.load_cases(path)
+
 
 if __name__ == '__main__':
     unittest.main()

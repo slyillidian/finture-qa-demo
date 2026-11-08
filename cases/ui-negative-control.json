@@ -1,0 +1,17 @@
+[
+  {
+    "name": "UI negative control: correct probe, wrong visible title expected",
+    "url": "linkprobe://app/product/123",
+    "launch": "cold",
+    "expect": {
+      "screen": "product_detail",
+      "product_id": "123"
+    },
+    "ui": [
+      {
+        "id": "qa.title",
+        "label": "Product 999"
+      }
+    ]
+  }
+]

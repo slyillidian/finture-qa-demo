@@ -70,17 +70,24 @@ class _ProbePageState extends State<ProbePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              screen == 'home'
-                  ? 'Home'
-                  : screen == 'product_detail'
-                  ? 'Product ${state['product_id']}'
-                  : 'Invalid link',
-              style: Theme.of(context).textTheme.headlineMedium,
+            Semantics(
+              identifier: 'qa.title',
+              child: Text(
+                screen == 'home'
+                    ? 'Home'
+                    : screen == 'product_detail'
+                    ? 'Product ${state['product_id']}'
+                    : 'Invalid link',
+                style: Theme.of(context).textTheme.headlineMedium,
+              ),
             ),
             const SizedBox(height: 16),
             Text('Route: ${widget.route}'),
-            if (state['reason'] != null) Text('Reason: ${state['reason']}'),
+            if (state['reason'] != null)
+              Semantics(
+                identifier: 'qa.reason',
+                child: Text('Reason: ${state['reason']}'),
+              ),
             const SizedBox(height: 24),
             const Text(
               'Try linkprobe://app/product/123 from the regression runner.',

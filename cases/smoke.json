@@ -1,8 +1,104 @@
 [
-  {"name":"cold product 123","url":"linkprobe://app/product/123","launch":"cold","expect":{"screen":"product_detail","product_id":"123"}},
-  {"name":"warm product 456","url":"linkprobe://app/product/456","launch":"warm","expect":{"screen":"product_detail","product_id":"456"}},
-  {"name":"warm repeat product","url":"linkprobe://app/product/456","launch":"warm","expect":{"screen":"product_detail","product_id":"456"}},
-  {"name":"cold missing ID","url":"linkprobe://app/product","launch":"cold","expect":{"screen":"error","reason":"invalid_product_id"}},
-  {"name":"warm malformed ID","url":"linkprobe://app/product/abc","launch":"warm","expect":{"screen":"error","reason":"invalid_product_id"}},
-  {"name":"warm unknown route","url":"linkprobe://app/unknown","launch":"warm","expect":{"screen":"error","reason":"unknown_route"}}
+  {
+    "name": "cold product 123",
+    "url": "linkprobe://app/product/123",
+    "launch": "cold",
+    "expect": {
+      "screen": "product_detail",
+      "product_id": "123"
+    },
+    "ui": [
+      {
+        "id": "qa.title",
+        "label": "Product 123"
+      }
+    ]
+  },
+  {
+    "name": "warm product 456",
+    "url": "linkprobe://app/product/456",
+    "launch": "warm",
+    "expect": {
+      "screen": "product_detail",
+      "product_id": "456"
+    },
+    "ui": [
+      {
+        "id": "qa.title",
+        "label": "Product 456"
+      }
+    ]
+  },
+  {
+    "name": "warm repeat product",
+    "url": "linkprobe://app/product/456",
+    "launch": "warm",
+    "expect": {
+      "screen": "product_detail",
+      "product_id": "456"
+    },
+    "ui": [
+      {
+        "id": "qa.title",
+        "label": "Product 456"
+      }
+    ]
+  },
+  {
+    "name": "cold missing ID",
+    "url": "linkprobe://app/product",
+    "launch": "cold",
+    "expect": {
+      "screen": "error",
+      "reason": "invalid_product_id"
+    },
+    "ui": [
+      {
+        "id": "qa.title",
+        "label": "Invalid link"
+      },
+      {
+        "id": "qa.reason",
+        "label": "Reason: invalid_product_id"
+      }
+    ]
+  },
+  {
+    "name": "warm malformed ID",
+    "url": "linkprobe://app/product/abc",
+    "launch": "warm",
+    "expect": {
+      "screen": "error",
+      "reason": "invalid_product_id"
+    },
+    "ui": [
+      {
+        "id": "qa.title",
+        "label": "Invalid link"
+      },
+      {
+        "id": "qa.reason",
+        "label": "Reason: invalid_product_id"
+      }
+    ]
+  },
+  {
+    "name": "warm unknown route",
+    "url": "linkprobe://app/unknown",
+    "launch": "warm",
+    "expect": {
+      "screen": "error",
+      "reason": "unknown_route"
+    },
+    "ui": [
+      {
+        "id": "qa.title",
+        "label": "Invalid link"
+      },
+      {
+        "id": "qa.reason",
+        "label": "Reason: unknown_route"
+      }
+    ]
+  }
 ]

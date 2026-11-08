@@ -14,21 +14,21 @@ from urllib.parse import urlparse
 
 
 class AlertHelper:
-    """Lazy XCUITest fallback; normal successful links never start UI testing."""
+    """Shared on-demand XCUITest runner for URL alerts and visible UI checks."""
     def __init__(self, device, app_name, directory):
         self.device, self.app_name, self.directory = device, app_name, directory
         self.products = Path(__file__).resolve().parents[1] / 'work/alert-helper/Build/Products'
         self.built = False
 
-    def command(self, args, log_path):
+    def command(self, args, log_path, allow_failure=False):
         with log_path.open('w') as log:
             result = subprocess.run(['xcodebuild', *args], stdout=log,
                                     stderr=subprocess.STDOUT, timeout=120)
-        if result.returncode:
-            raise RuntimeError(f'Alert helper failed; see {log_path}')
+        if result.returncode and not allow_failure:
+            raise RuntimeError(f'XCUITest helper failed; see {log_path}')
         return log_path.read_text()
 
-    def handle(self, index):
+    def run_test(self, index, kind, test, environment, allow_failure=False):
         root = Path(__file__).resolve().parents[1]
         destination = f'platform=iOS Simulator,id={self.device}'
         if not self.built:
@@ -43,18 +43,44 @@ class AlertHelper:
         settings = plistlib.loads(originals[0].read_bytes())
         for key, target in settings.items():
             if key != '__xctestrun_metadata__':
-                target.setdefault('EnvironmentVariables', {})['LP_EXPECTED_APP_NAME'] = self.app_name
+                target.setdefault('EnvironmentVariables', {}).update(environment)
         # Keep beside the original: xctestrun resolves paths relative to __TESTROOT__.
         configured = self.products / 'configured.xctestrun'
         configured.write_bytes(plistlib.dumps(settings))
         log = self.command(['test-without-building', '-xctestrun', str(configured),
                             '-destination', destination, '-parallel-testing-enabled', 'NO',
-                            '-resultBundlePath', str(self.directory / f'{index:02d}-alert.xcresult')],
-                           self.directory / f'{index:02d}-alert.log')
+                            '-only-testing', f'AlertHelper/AlertHelper/{test}',
+                            '-resultBundlePath', str(self.directory / f'{index:02d}-{kind}.xcresult')],
+                           self.directory / f'{index:02d}-{kind}.log', allow_failure=allow_failure)
+        return log
+
+    def handle(self, index):
+        log = self.run_test(index, 'alert', 'testHandleOpenAlert',
+                            {'LP_EXPECTED_APP_NAME': self.app_name})
         for status in ('opened', 'not_present'):
             if f'LINK_PROBE_ALERT:{status}' in log:
                 return status
         raise RuntimeError('Alert helper returned no recognized outcome')
+
+    def assert_ui(self, index, bundle, assertions, timeout):
+        log = self.run_test(index, 'ui', 'testAssertUI', {
+            'LP_BUNDLE_ID': bundle,
+            'LP_UI_ASSERTIONS': json.dumps(assertions),
+            'LP_UI_TIMEOUT': str(timeout),
+        }, allow_failure=True)
+        for line in log.splitlines():
+            if line.startswith('LINK_PROBE_UI:'):
+                try:
+                    result = json.loads(line.removeprefix('LINK_PROBE_UI:'))
+                except json.JSONDecodeError as exc:
+                    raise RuntimeError('Invalid UI helper JSON result') from exc
+                if not isinstance(result, dict) or type(result.get('passed')) is not bool:
+                    raise RuntimeError('Invalid UI helper result')
+                # A structured success must also have a successful XCTest session.
+                if result['passed'] and '** TEST EXECUTE SUCCEEDED **' not in log:
+                    raise RuntimeError('UI helper reported success but XCTest session failed')
+                return result
+        raise RuntimeError('UI helper returned no result; see UI log and xcresult')
 
 
 def load_cases(path):
@@ -79,6 +105,18 @@ def load_cases(path):
             raise ValueError(f'{name}: expect.screen required')
         if any(not isinstance(k, str) or not isinstance(v, str) for k, v in expect.items()):
             raise ValueError(f'{name}: expected fields must be strings')
+        if 'ui' in case:
+            assertions = case['ui']
+            if not isinstance(assertions, list) or not assertions:
+                raise ValueError(f'{name}: ui must be a non-empty array')
+            ids = set()
+            for assertion in assertions:
+                if (not isinstance(assertion, dict)
+                        or any(not isinstance(assertion.get(k), str) or not assertion[k].strip()
+                               for k in ('id', 'label'))
+                        or assertion['id'] in ids):
+                    raise ValueError(f'{name}: ui requires unique non-empty id and label strings')
+                ids.add(assertion['id'])
         timeout = case.get('timeout_seconds', 10)
         if isinstance(timeout, bool) or not isinstance(timeout, (float, int)) or not math.isfinite(timeout) or timeout <= 0:
             raise ValueError(f'{name}: timeout must be positive and finite')
@@ -92,10 +130,11 @@ def mismatches(case, actual):
 
 
 class Simulator:
-    def __init__(self, device, bundle, directory, alert_helper=None):
+    def __init__(self, device, bundle, directory, alert_helper=None, ui_helper=None):
         self.device, self.bundle, self.directory = device, bundle, directory
         self.log = []
         self.alert_helper = alert_helper
+        self.ui_helper = ui_helper
 
     def call(self, *args, allow_failure=False):
         result = subprocess.run(['xcrun', 'simctl', *args], capture_output=True,
@@ -154,6 +193,18 @@ class Simulator:
                     result['actual'] = actual
                     result['mismatches'] = mismatches(case, actual)
                     result['passed'] = not result['mismatches']
+                result['probe_passed'] = result['passed']
+                if 'ui' in case and result['probe_passed']:
+                    # Fail closed if UI checks were requested but cannot run.
+                    result['passed'] = False
+                    if self.ui_helper is None:
+                        raise RuntimeError('UI assertions requested but no UI helper configured')
+                    result['ui_assertions'] = self.ui_helper.assert_ui(
+                        index, self.bundle, case['ui'], case.get('timeout_seconds', 10))
+                    result['passed'] = result['ui_assertions']['passed']
+                else:
+                    result['ui_assertions'] = {'status': 'skipped', 'reason':
+                        'probe_failed' if 'ui' in case else 'not_requested'}
             except (OSError, RuntimeError, subprocess.TimeoutExpired) as exc:
                 result['error'] = str(exc)
             if not result['passed']:
@@ -188,7 +239,8 @@ def main():
         if not args.app_name.strip():
             raise ValueError('--app-name must not be empty')
         helper = AlertHelper(args.device, args.app_name, directory) if args.alert_policy == 'auto' else None
-        simulator = Simulator(args.device, args.bundle, directory, helper)
+        ui_helper = helper or AlertHelper(args.device, args.app_name, directory)
+        simulator = Simulator(args.device, args.bundle, directory, helper, ui_helper)
         results = simulator.run(cases)
         (directory / 'results.json').write_text(json.dumps(results, indent=2, ensure_ascii=False))
         lines = ['# Link Probe report', '']
