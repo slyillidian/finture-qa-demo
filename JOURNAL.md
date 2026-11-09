@@ -98,7 +98,7 @@ AI 解释成功截图保存在 xcresult，认可每条用例都应该保存独�
 
 ## 换个角色
 
-完整 200～500 字思考见 [docs/ROLE_REFLECTION.md](docs/ROLE_REFLECTION.md)。围绕运营活动入口验收，让程序重复检查已确认的规则，人亲自确认活动语义与视觉结果。
+完整 200～500 字思考见 [docs/ROLE_REFLECTION.md](docs/ROLE_REFLECTION.md)。围绕产品同事的需求评审前自查，让 AI 引用原文找出模糊规则、异常流程和验收条件缺口，由人确认问题、业务取舍与最终决策。
 
 ## 没有证明的事情
 
