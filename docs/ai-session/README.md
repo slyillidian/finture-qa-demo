@@ -1,8 +1,8 @@
 # 会话记录阅读入口
 
-先读 [conversation.md](conversation.md)。[original-messages.jsonl](original-messages.jsonl) 保留所选原始消息记录，[manifest.json](manifest.json) 提供导出范围、数量与校验值。
+先读 [conversation.md](conversation.md)。[original-messages.jsonl](original-messages.jsonl) 保存所选原始记录，[manifest.json](manifest.json) 提供范围、数量和校验值。
 
-这是用户/助手原文导出，不是内部运行日志全量备份；本轮个人体验补充确认单独保存原文。后续新增对话不会自动同步。
+不是内部运行日志全量备份；后续消息不会自动同步。另附 [提交者补充确认](submitter-confirmations.md)。
 
 ## 用户请求索引
 
@@ -40,3 +40,11 @@
 - [110 · 另外一个问题，我们这些测试的结果都是生成了文件放在了app的沙盒里面？然后再读取成最后reports放在工程下面吗](conversation.md#message-110)
 - [112 · 把此次ai对话的历史记录地址发我。](conversation.md#message-112)
 - [114 · 生成最终的会话记录并把文件放置在docs下面吧。生成的demo也放在这下面。](conversation.md#message-114)
+- [117 · 逐项检查下还有什么遗漏的没有](conversation.md#message-117)
+- [122 · 哪些是需要我审阅的列出来。视频播放我自己已经确认过。邮件后续我自己发。](conversation.md#message-122)
+- [124 · **## 再给一周，我会怎么改进**](conversation.md#message-124)
+- [127 · 怎么我本地文件没看看到更新？](conversation.md#message-127)
+- [130 · 对于换个角色这一块，并不定要和我们在做的这个东西相关吧。有其他合适的方向吗？](conversation.md#message-130)
+- [132 · 我觉得换成需求评审前检查吧。](conversation.md#message-132)
+- [135 · 好了。帮我提交下git。](conversation.md#message-135)
+- [138 · 再次确认下有没有遗漏项或者不恰当的地方。](conversation.md#message-138)

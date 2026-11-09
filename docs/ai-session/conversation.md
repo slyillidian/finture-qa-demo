@@ -1,10 +1,10 @@
 # AI 原始会话记录（最终交付快照）
 
-本快照含 115 条本项目的原始 user/assistant 消息，覆盖选题、开发、纠错、UI 验证与沙盒机制问答，以及本次最终导出请求。保留消息原文、顺序与时间戳，不是 AI 重新生成的对话总结。
+本快照含 140 条本项目原始 user/assistant 消息，包含开发、验证、交付准备、Universal Link 改进计划及角色思考修订。保留原文、顺序与时间戳，不是重新生成的总结。
 
-导出仅包含用户与助手消息；系统/开发者配置、内部推理、工具调用与输出、二进制附件不在此文本记录范围内。自动附带的 IDE 上下文原样保留。截图与运行证据见仓库 evidence/；提交者本轮补充确认另见 submitter-confirmations.md。
+仅导出用户/助手消息；不包含内部推理、系统/开发者配置、工具调用与输出或二进制附件。IDE 上下文原样保留，运行证据见 evidence/。
 
-最后一条消息时间：2026-11-09T07:32:25.116Z（UTC，北京时间为 UTC+8）。这是截至导出时的快照，不包含本轮导出完成后才产生的回复。
+最后一条消息：2026-11-09T08:06:01.380Z（UTC；北京时间为 UTC+8）。本轮导出后的回复不会自动纳入。
 
 <a id="message-1"></a>
 ## 001 · user · 2026-11-05T08:19:33.528Z
@@ -2283,4 +2283,325 @@ Python 生成 results.json、report.md、commands.json
 ## 115 · assistant · 2026-11-09T07:32:25.116Z
 
 我会更新会话记录到目前这一轮，放到仓库的 `docs/` 下，并把 Demo 视频一并复制过去。记录会保留原始对话文本和时间戳，明确导出范围。
+
+
+<a id="message-116"></a>
+## 116 · assistant · 2026-11-09T07:34:06.236Z
+
+已放入 `docs/` 并推送到 GitHub：
+
+- [最终会话记录](https://github.com/slyillidian/finture-qa-demo/blob/main/docs/ai-session/conversation.md)：115 条原始消息，包含新增问答及本次导出请求。
+- [Demo 视频](https://github.com/slyillidian/finture-qa-demo/blob/main/docs/Link-Probe-Demo.mp4)：约 63 秒，无旁白中文说明。
+
+README 已添加入口。现在通过仓库链接即可获取全部交付材料。
+
+<a id="message-117"></a>
+## 117 · user · 2026-11-09T07:37:58.585Z
+
+# Context from my IDE setup:
+
+## Active file: README.md
+
+## Active selection of the file:
+python3 src/link_probe.py --device <模拟器UDID> --cases cases/smoke.json
+
+## Open tabs:
+- README.md: README.md
+- conversation.md: docs/ai-session/conversation.md
+- manifest.json: docs/ai-session/manifest.json
+- conversation.md: /Users/sly/Documents/Codex/2026-11-05/ai-chatgpt-codex-cli-claude-code/outputs/ai-session/conversation.md
+- link_probe.py: src/link_probe.py
+
+## My request:
+逐项检查下还有什么遗漏的没有
+
+
+<a id="message-118"></a>
+## 118 · assistant · 2026-11-09T07:38:05.600Z
+
+我会按原作业要求逐项检查当前提交版，重点核对交付链接、日志内容、运行说明、视频与会话记录是否一致，并直接修正能确认的遗漏。
+
+
+<a id="message-119"></a>
+## 119 · assistant · 2026-11-09T07:39:02.894Z
+
+发现几处文档还停留在旧状态：README 仍写“需另行导出会话和录视频”，部分导读仍写附件单独交付，11 月 9 日的日志标题还写“尚未发生”。这些会让评审误以为交付没完成，我会统一修正。
+
+目前已确认必需文件都在 Git 中、相对链接没有断链、会话校验值一致，新增的 UI 和沙盒问答也已包含在记录里。
+
+
+<a id="message-120"></a>
+## 120 · assistant · 2026-11-09T07:40:53.495Z
+
+仓库公开性也已确认：无鉴权 GitHub API 返回 `private: false`。视频、原始会话及运行证据均已提交，文本文件扫描未发现常见密钥模式。
+
+必交材料没有发现缺项。剩下需要你本人完成的是：审阅个人表述、播放最终视频，以及发送邮件；“AI 能生成材料”不等于这些人工确认已经完成。
+
+
+<a id="message-121"></a>
+## 121 · assistant · 2026-11-09T07:41:55.191Z
+
+**逐项检查后，没有发现必交文件缺失。** 已修正几处旧文案，并推送到仓库。
+
+| 要求 | 结果 |
+|---|---|
+| AI 实质参与核心代码 | ✅ 有代码、会话和 Git 历史佐证 |
+| 本机实际运行 | ✅ 正常 6 条通过，反向用例正确失败 |
+| 多次有效 Git 提交 | ✅ 历史完整，仓库公开可访问 |
+| README 安装、运行、限制 | ✅ 已补全，并增加查询模拟器 UDID 的命令 |
+| JOURNAL 所有指定章节 | ✅ 已齐；提前提交按真实阶段总结处理 |
+| 两件意外、一件不足、后续改进 | ✅ 已按你的确认写入 |
+| 200～500 字角色思考 | ✅ 366 字 |
+| Demo 视频 | ✅ 约 63 秒，中文说明，已放入 `docs/` |
+| AI 原始会话 | ✅ 原文、索引、JSONL 和校验信息齐全 |
+
+修正了“视频/会话尚待生成”“附件单独交付”、旧版 Demo 时间安排及 11 月 9 日日志标题等不一致内容。
+
+完整结果见：[提交前逐项复核](https://github.com/slyillidian/finture-qa-demo/blob/main/docs/FINAL_REVIEW.md)。
+
+**剩下只需你本人：审阅 JOURNAL 和角色思考、完整播放视频、发送邮件。** 邮件尚未发送。
+
+<a id="message-122"></a>
+## 122 · user · 2026-11-09T07:42:48.445Z
+
+# Context from my IDE setup:
+
+## Active file: README.md
+
+## Open tabs:
+- README.md: README.md
+- conversation.md: docs/ai-session/conversation.md
+- manifest.json: docs/ai-session/manifest.json
+- conversation.md: /Users/sly/Documents/Codex/2026-11-05/ai-chatgpt-codex-cli-claude-code/outputs/ai-session/conversation.md
+- link_probe.py: src/link_probe.py
+
+## My request:
+哪些是需要我审阅的列出来。视频播放我自己已经确认过。邮件后续我自己发。
+
+
+<a id="message-123"></a>
+## 123 · assistant · 2026-11-09T07:43:03.010Z
+
+视频已由你确认，邮件由你后续发送。现在主要审阅这几处：
+
+| 材料 | 重点确认 |
+|---|---|
+| **[JOURNAL.md](https://github.com/slyillidian/finture-qa-demo/blob/main/JOURNAL.md)** | 开发日期、最初预期、认知变化、两件意外、最不满意的经历，是否准确表达你的真实体验；“再给一周”的优先级是否认同 |
+| **[角色思考](https://github.com/slyillidian/finture-qa-demo/blob/main/docs/ROLE_REFLECTION.md)** | 是否认同这个运营验收场景，以及哪些事情交给程序、哪些必须人工检查；面试时能否用自己的话解释 |
+| **[README.md](https://github.com/slyillidian/finture-qa-demo/blob/main/README.md)** | 工具定位、功能和限制是否与你的理解一致，尤其是“仅支持模拟器”“不是完整视觉检查” |
+| **[AI 会话记录](https://github.com/slyillidian/finture-qa-demo/blob/main/docs/ai-session/conversation.md)** | 快速检查是否有不希望对外公开的个人信息、公司信息或 IDE 上下文 |
+
+**最需要逐段读的是前两份；README 核对口径，会话记录重点查隐私。** 其他导读、技术证据和检查表已做过一致性检查，不需要你逐份精读。
+
+<a id="message-124"></a>
+## 124 · user · 2026-11-09T07:49:24.394Z
+
+# Context from my IDE setup:
+
+## Active file: JOURNAL.md
+
+## Active selection of the file:
+## 再给一周，我会怎么改进
+
+## Open tabs:
+- JOURNAL.md: JOURNAL.md
+- AGENTS.md: AGENTS.md
+- README.md: README.md
+- conversation.md: docs/ai-session/conversation.md
+- manifest.json: docs/ai-session/manifest.json
+
+## My request:
+**## 再给一周，我会怎么改进**
+这里帮我加一条Universal link有效性校验
+
+
+<a id="message-125"></a>
+## 125 · assistant · 2026-11-09T07:49:30.413Z
+
+我会在这一节补上 Universal Link 有效性校验的计划、优先级和原因，并注明这是后续改进，尚未实现。
+
+
+<a id="message-126"></a>
+## 126 · assistant · 2026-11-09T07:50:11.633Z
+
+已添加并推送到 JOURNAL 的改进计划第 4 条，包含：
+
+- 检查 AASA 文件、应用标识与域名关联配置。
+- 实际验证链接能否进入正确页面及未安装时的网页回退。
+- 说明价值：发现“网页能打开，但无法唤起 App”的问题。
+- 明确标注为后续计划，当前尚未实现。
+
+[查看更新](https://github.com/slyillidian/finture-qa-demo/blob/main/JOURNAL.md)
+
+<a id="message-127"></a>
+## 127 · user · 2026-11-09T07:53:46.154Z
+
+# Context from my IDE setup:
+
+## Active file: JOURNAL.md
+
+## Open tabs:
+- JOURNAL.md: JOURNAL.md
+- AGENTS.md: AGENTS.md
+- README.md: README.md
+- conversation.md: docs/ai-session/conversation.md
+- manifest.json: docs/ai-session/manifest.json
+
+## My request:
+怎么我本地文件没看看到更新？
+
+
+<a id="message-128"></a>
+## 128 · assistant · 2026-11-09T07:53:51.798Z
+
+我核对一下本地文件和刚提交的内容，确认更新是否在同一个工程里。
+
+
+<a id="message-129"></a>
+## 129 · assistant · 2026-11-09T07:54:01.081Z
+
+本地已更新，我刚确认文件是：
+
+```text
+/Users/sly/work/finture-qa-demo/JOURNAL.md
+```
+
+在“再给一周，我会怎么改进”下，第 **4 条：补充 Universal Link 有效性校验**。
+
+你可以在当前文件中按 `Cmd + F` 搜索 **Universal Link**。如果仍看不到，关闭这个标签后，从工程文件树重新打开；注意保留任何未保存的修改。
+
+<a id="message-130"></a>
+## 130 · user · 2026-11-09T07:59:07.894Z
+
+# Context from my IDE setup:
+
+## Active file: docs/ROLE_REFLECTION.md
+
+## Open tabs:
+- ROLE_REFLECTION.md: docs/ROLE_REFLECTION.md
+- JOURNAL.md: JOURNAL.md
+- conversation.md: /Users/sly/Documents/Codex/2026-11-05/ai-chatgpt-codex-cli-claude-code/outputs/ai-session/conversation.md
+- AGENTS.md: AGENTS.md
+- README.md: README.md
+
+## My request:
+对于换个角色这一块，并不定要和我们在做的这个东西相关吧。有其他合适的方向吗？
+
+
+<a id="message-131"></a>
+## 131 · assistant · 2026-11-09T07:59:32.843Z
+
+对，**不需要与当前工具相关**。题目考的是：你能否找到产品或运营的一项具体工作，设计 AI 协作流程，并说明哪些结果必须本人检查、为什么。
+
+之前选“活动链接验收”是为了贴近项目，但可以换成更典型的日常工作：
+
+| 方向 | AI 可以做什么 | 人必须检查什么 |
+|---|---|---|
+| **用户反馈整理** | 将反馈归类、合并相似问题、提取原文证据，形成待讨论的问题清单 | 是否误解用户、遗漏低频严重问题；不能直接用反馈数量决定优先级 |
+| **需求评审前检查** | 根据需求文档找出模糊表述、异常流程、规则冲突和待确认事项 | 问题是否成立、业务规则是什么；AI 不能擅自补全产品决策 |
+| **活动上线前物料核对** | 对照确认过的活动规则，检查推文、海报文案、报名页中的时间、价格和参与条件 | 原始规则是否正确、图片中文字是否识别准确、最终发布内容 |
+| **运营周报初稿** | 根据明确的数据口径整理变化、计算指标、列出需要调查的问题 | 数据来源、分母和时间范围；不能把相关性写成因果解释 |
+
+**我更推荐“用户反馈整理”。** 它容易让完全没用过 AI 的产品或运营同事开始尝试，也能体现清楚的分工：
+
+> 先拿一小批脱敏反馈，让 AI 按类别整理，每个结论附原文编号；同事逐条抽查，补充业务背景，再决定哪些问题进入需求讨论。
+
+这个方向值得写的判断是：**AI 可以帮助整理证据，但问题的重要性仍由人判断。** 例如，反馈少的支付失败可能比反馈多的颜色偏好更紧急；多次转述同一个问题，也不能当作多个独立用户。
+
+如果你自己参与过需求评审，选“需求评审前检查”也很合适：你能更具体地说明 AI 应该提出问题，而不是自行替产品补规则。
+
+<a id="message-132"></a>
+## 132 · user · 2026-11-09T08:01:13.360Z
+
+# Context from my IDE setup:
+
+## Active file: docs/ROLE_REFLECTION.md
+
+## Open tabs:
+- ROLE_REFLECTION.md: docs/ROLE_REFLECTION.md
+- JOURNAL.md: JOURNAL.md
+- conversation.md: /Users/sly/Documents/Codex/2026-11-05/ai-chatgpt-codex-cli-claude-code/outputs/ai-session/conversation.md
+- AGENTS.md: AGENTS.md
+- README.md: README.md
+
+## My request:
+我觉得换成需求评审前检查吧。
+
+
+<a id="message-133"></a>
+## 133 · assistant · 2026-11-09T08:01:19.274Z
+
+我会把角色思考改成“帮助没用过 AI 的产品同事做需求评审前检查”，保持 200～500 字，并同步修改 JOURNAL 中的对应介绍。
+
+
+<a id="message-134"></a>
+## 134 · assistant · 2026-11-09T08:02:04.992Z
+
+已改为“帮助产品同事做需求评审前检查”，正文约 378 字，已推送。
+
+内容包括：从小需求入手、要求 AI 引用原文提出问题、用优惠券过期规则举例，以及哪些判断必须由人完成、为什么。
+
+[查看角色思考](https://github.com/slyillidian/finture-qa-demo/blob/main/docs/ROLE_REFLECTION.md)
+
+JOURNAL 和检查清单也已同步更新。
+
+<a id="message-135"></a>
+## 135 · user · 2026-11-09T08:03:22.669Z
+
+# Context from my IDE setup:
+
+## Active file: docs/ROLE_REFLECTION.md
+
+## Open tabs:
+- ROLE_REFLECTION.md: docs/ROLE_REFLECTION.md
+- JOURNAL.md: JOURNAL.md
+- conversation.md: /Users/sly/Documents/Codex/2026-11-05/ai-chatgpt-codex-cli-claude-code/outputs/ai-session/conversation.md
+- AGENTS.md: AGENTS.md
+- README.md: README.md
+
+## My request:
+好了。帮我提交下git。
+
+
+<a id="message-136"></a>
+## 136 · assistant · 2026-11-09T08:03:26.710Z
+
+我先检查是否还有未提交的修改，再提交并同步到远程。
+
+
+<a id="message-137"></a>
+## 137 · assistant · 2026-11-09T08:03:35.946Z
+
+当前没有未提交修改，`main` 已与远程同步。
+
+最新提交是 `08216d4`，已包含需求评审前检查的角色思考及相关文档更新，无需重复提交。
+
+<a id="message-138"></a>
+## 138 · user · 2026-11-09T08:05:29.698Z
+
+# Context from my IDE setup:
+
+## Active file: docs/ROLE_REFLECTION.md
+
+## Open tabs:
+- ROLE_REFLECTION.md: docs/ROLE_REFLECTION.md
+- JOURNAL.md: JOURNAL.md
+- conversation.md: /Users/sly/Documents/Codex/2026-11-05/ai-chatgpt-codex-cli-claude-code/outputs/ai-session/conversation.md
+- AGENTS.md: AGENTS.md
+- README.md: README.md
+
+## My request:
+再次确认下有没有遗漏项或者不恰当的地方。
+
+
+<a id="message-139"></a>
+## 139 · assistant · 2026-11-09T08:05:33.961Z
+
+我再核对一遍最终版本，重点检查有没有过度承诺、旧文案或与实际交付不一致的地方；发现明确问题就直接修正。
+
+
+<a id="message-140"></a>
+## 140 · assistant · 2026-11-09T08:06:01.380Z
+
+发现三处需要更新：复核表还把你已确认的视频播放列为待办、仍保留旧的本地 `.metadata` 差异说明；会话快照也尚未包含后来新增的 Universal Link 计划和角色思考修订。我会同步这些状态，邮件仍标记为由你后续发送。
 
