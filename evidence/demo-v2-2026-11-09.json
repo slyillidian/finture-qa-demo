@@ -1,0 +1,330 @@
+{
+  "date": "2026-11-09",
+  "video_seconds": 117.10833333333333,
+  "audio_tracks": 0,
+  "video_sha256": "5e3f8cf08781f126ac5ba823339a5dd24bc78dce57ad9dcd73544c4e985b1af8",
+  "presentation": "Actual simulator recording plus case/command/process cards, time-aligned real stdout, and actual report excerpts/screenshots. Not a desktop terminal screen recording. Execution not sped up.",
+  "sections": [
+    {
+      "title": "Link Probe / 本地 QA 命令行工具",
+      "start": 0,
+      "end": 3
+    },
+    {
+      "title": "01 / 输入：JSON 定义检查什么",
+      "start": 3,
+      "end": 11
+    },
+    {
+      "title": "02 / 执行：一条 Python 命令",
+      "start": 11,
+      "end": 16
+    },
+    {
+      "title": "脚本内部 / 五个核心步骤",
+      "start": 16,
+      "end": 23
+    },
+    {
+      "title": "03 / 运行：脚本输出与模拟器同步",
+      "start": 23,
+      "end": 74.21166666666667
+    },
+    {
+      "title": "04 / 产出：成功报告与独立 PNG",
+      "start": 74.21166666666667,
+      "end": 82.21166666666667
+    },
+    {
+      "title": "05 / 反向检查：故意要求错误 UI",
+      "start": 82.21166666666667,
+      "end": 88.21166666666667
+    },
+    {
+      "title": "06 / 运行反向用例",
+      "start": 88.21166666666667,
+      "end": 105.10833333333333
+    },
+    {
+      "title": "07 / 定位：探针通过，UI 失败",
+      "start": 105.10833333333333,
+      "end": 113.10833333333333
+    },
+    {
+      "title": "交付结果 / 可重复执行，而不是聊天测试",
+      "start": 113.10833333333333,
+      "end": 117.10833333333333
+    }
+  ],
+  "runs": {
+    "smoke": {
+      "exit_code": 0,
+      "results": [
+        {
+          "name": "cold product 123",
+          "url": "linkprobe://app/product/123",
+          "launch": "cold",
+          "expected": {
+            "screen": "product_detail",
+            "product_id": "123"
+          },
+          "passed": true,
+          "alert_handling": "not_present",
+          "actual": {
+            "screen": "product_detail",
+            "product_id": "123",
+            "route": "/product/123"
+          },
+          "mismatches": {},
+          "probe_passed": true,
+          "ui_assertions": {
+            "app_foreground": true,
+            "checks": [
+              {
+                "actual_label": "Product 123",
+                "expected_label": "Product 123",
+                "hittable": true,
+                "id": "qa.title",
+                "matches": 1,
+                "passed": true
+              }
+            ],
+            "passed": true
+          },
+          "screenshot": "01-pass.png",
+          "seconds": 21.916
+        },
+        {
+          "name": "warm product 456",
+          "url": "linkprobe://app/product/456",
+          "launch": "warm",
+          "expected": {
+            "screen": "product_detail",
+            "product_id": "456"
+          },
+          "passed": true,
+          "alert_handling": "not_present",
+          "actual": {
+            "screen": "product_detail",
+            "product_id": "456",
+            "route": "/product/456"
+          },
+          "mismatches": {},
+          "probe_passed": true,
+          "ui_assertions": {
+            "app_foreground": true,
+            "checks": [
+              {
+                "actual_label": "Product 456",
+                "expected_label": "Product 456",
+                "hittable": true,
+                "id": "qa.title",
+                "matches": 1,
+                "passed": true
+              }
+            ],
+            "passed": true
+          },
+          "screenshot": "02-pass.png",
+          "seconds": 10.83
+        },
+        {
+          "name": "warm repeat product",
+          "url": "linkprobe://app/product/456",
+          "launch": "warm",
+          "expected": {
+            "screen": "product_detail",
+            "product_id": "456"
+          },
+          "passed": true,
+          "actual": {
+            "screen": "product_detail",
+            "product_id": "456",
+            "route": "/product/456"
+          },
+          "mismatches": {},
+          "probe_passed": true,
+          "ui_assertions": {
+            "app_foreground": true,
+            "checks": [
+              {
+                "actual_label": "Product 456",
+                "expected_label": "Product 456",
+                "hittable": true,
+                "id": "qa.title",
+                "matches": 1,
+                "passed": true
+              }
+            ],
+            "passed": true
+          },
+          "screenshot": "03-pass.png",
+          "seconds": 4.021
+        },
+        {
+          "name": "cold missing ID",
+          "url": "linkprobe://app/product",
+          "launch": "cold",
+          "expected": {
+            "screen": "error",
+            "reason": "invalid_product_id"
+          },
+          "passed": true,
+          "actual": {
+            "screen": "error",
+            "reason": "invalid_product_id",
+            "route": "/product"
+          },
+          "mismatches": {},
+          "probe_passed": true,
+          "ui_assertions": {
+            "app_foreground": true,
+            "checks": [
+              {
+                "actual_label": "Invalid link",
+                "expected_label": "Invalid link",
+                "hittable": true,
+                "id": "qa.title",
+                "matches": 1,
+                "passed": true
+              },
+              {
+                "actual_label": "Reason: invalid_product_id",
+                "expected_label": "Reason: invalid_product_id",
+                "hittable": true,
+                "id": "qa.reason",
+                "matches": 1,
+                "passed": true
+              }
+            ],
+            "passed": true
+          },
+          "screenshot": "04-pass.png",
+          "seconds": 3.782
+        },
+        {
+          "name": "warm malformed ID",
+          "url": "linkprobe://app/product/abc",
+          "launch": "warm",
+          "expected": {
+            "screen": "error",
+            "reason": "invalid_product_id"
+          },
+          "passed": true,
+          "actual": {
+            "screen": "error",
+            "reason": "invalid_product_id",
+            "route": "/product/abc"
+          },
+          "mismatches": {},
+          "probe_passed": true,
+          "ui_assertions": {
+            "app_foreground": true,
+            "checks": [
+              {
+                "actual_label": "Invalid link",
+                "expected_label": "Invalid link",
+                "hittable": true,
+                "id": "qa.title",
+                "matches": 1,
+                "passed": true
+              },
+              {
+                "actual_label": "Reason: invalid_product_id",
+                "expected_label": "Reason: invalid_product_id",
+                "hittable": true,
+                "id": "qa.reason",
+                "matches": 1,
+                "passed": true
+              }
+            ],
+            "passed": true
+          },
+          "screenshot": "05-pass.png",
+          "seconds": 4.364
+        },
+        {
+          "name": "warm unknown route",
+          "url": "linkprobe://app/unknown",
+          "launch": "warm",
+          "expected": {
+            "screen": "error",
+            "reason": "unknown_route"
+          },
+          "passed": true,
+          "actual": {
+            "screen": "error",
+            "reason": "unknown_route",
+            "route": "/unknown"
+          },
+          "mismatches": {},
+          "probe_passed": true,
+          "ui_assertions": {
+            "app_foreground": true,
+            "checks": [
+              {
+                "actual_label": "Invalid link",
+                "expected_label": "Invalid link",
+                "hittable": true,
+                "id": "qa.title",
+                "matches": 1,
+                "passed": true
+              },
+              {
+                "actual_label": "Reason: unknown_route",
+                "expected_label": "Reason: unknown_route",
+                "hittable": true,
+                "id": "qa.reason",
+                "matches": 1,
+                "passed": true
+              }
+            ],
+            "passed": true
+          },
+          "screenshot": "06-pass.png",
+          "seconds": 3.769
+        }
+      ],
+      "stdout": "PASS cold product 123\nPASS warm product 456\nPASS warm repeat product\nPASS cold missing ID\nPASS warm malformed ID\nPASS warm unknown route\nReport: /Users/sly/work/finture-qa-demo/reports/20261109-161102-d15304\n"
+    },
+    "negative": {
+      "exit_code": 1,
+      "results": [
+        {
+          "name": "UI negative control: correct probe, wrong visible title expected",
+          "url": "linkprobe://app/product/123",
+          "launch": "cold",
+          "expected": {
+            "screen": "product_detail",
+            "product_id": "123"
+          },
+          "passed": false,
+          "actual": {
+            "screen": "product_detail",
+            "product_id": "123",
+            "route": "/product/123"
+          },
+          "mismatches": {},
+          "probe_passed": true,
+          "ui_assertions": {
+            "app_foreground": true,
+            "checks": [
+              {
+                "actual_label": "Product 123",
+                "expected_label": "Product 999",
+                "hittable": true,
+                "id": "qa.title",
+                "matches": 1,
+                "passed": false
+              }
+            ],
+            "passed": false
+          },
+          "screenshot": "01-failure.png",
+          "seconds": 14.595
+        }
+      ],
+      "stdout": "FAIL UI negative control: correct probe, wrong visible title expected\nReport: /Users/sly/work/finture-qa-demo/reports/20261109-161153-dba4b3\n"
+    }
+  }
+}

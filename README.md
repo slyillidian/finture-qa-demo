@@ -43,7 +43,7 @@ cd example && flutter test
 
 ## AI 协作与交付
 
-AI 实质参与核心 App、CLI、测试和文档的编写；人工负责范围判断与验收。JOURNAL.md 仅记录实际发生的过程，不预填未来日期。evidence/ 保存开发证据及早期协作摘要；最终原始会话见 [docs/ai-session/conversation.md](docs/ai-session/conversation.md)，约 63 秒 Demo 见 [docs/Link-Probe-Demo.mp4](docs/Link-Probe-Demo.mp4)。
+AI 实质参与核心 App、CLI、测试和文档的编写；人工负责范围判断与验收。JOURNAL.md 仅记录实际发生的过程，不预填未来日期。evidence/ 保存开发证据及早期协作摘要；最终原始会话见 [docs/ai-session/conversation.md](docs/ai-session/conversation.md)，约 117 秒 Demo 见 [docs/Link-Probe-Demo.mp4](docs/Link-Probe-Demo.mp4)。
 
 ## 首次运行与路由约定
 
