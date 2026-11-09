@@ -123,7 +123,7 @@ python3 src/link_probe.py --device <模拟器UDID> --cases cases/ui-negative-con
 - [Demo 录制脚本](docs/DEMO_SCRIPT.md)：正常用例、失败断言与人工截图复核。
 - [换个角色思考](docs/ROLE_REFLECTION.md)：AI 协作撰写，提交者最终审阅。
 - [提交检查表](docs/SUBMISSION_CHECKLIST.md)：明确区分已完成和需本人确认的内容。
-- 原始 AI 对话文本和视频作为单独附件交付；仓库内 SESSION_NOTES 只是摘要，不能代替原始记录。
+- [最终 AI 会话记录](docs/ai-session/conversation.md)和 [Demo 视频](docs/Link-Probe-Demo.mp4)均已放在 docs/；仓库内 SESSION_NOTES 只是早期摘要，不能代替原始记录。
 
 ## VS Code 与常见环境问题
 

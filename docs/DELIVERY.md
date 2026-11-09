@@ -3,10 +3,10 @@
 ## 三个提交物
 
 1. **完整 Git 仓库**：https://github.com/slyillidian/finture-qa-demo 。按提交者要求，仅提供仓库链接，不另外制作仓库 ZIP；开发过程的完整历史保留在 GitHub。
-2. **Demo 视频**：Link-Probe-Demo.mp4，约 63 秒，无旁白、有中文说明，实际模拟器录制，包含正常用例及明确标注的错误 UI 预期反向检查。
-3. **AI 会话**：AI-Conversation.zip，包含原始 user/assistant 对话文本、原始选定消息 JSONL、阅读索引、范围说明、校验信息及提交者补充确认。不是事后生成的对话摘要；不包含内部推理、系统/开发者配置或全部工具日志。
+2. **Demo 视频**：[Link-Probe-Demo.mp4](Link-Probe-Demo.mp4)，约 63 秒，无旁白、有中文说明，实际模拟器录制，包含正常用例及明确标注的错误 UI 预期反向检查。
+3. **AI 会话**：[阅读入口](ai-session/README.md)、[完整原文](ai-session/conversation.md)，包含原始 user/assistant 对话文本、原始选定消息 JSONL、阅读索引、范围说明、校验信息及提交者补充确认。不是事后生成的对话摘要；不包含内部推理、系统/开发者配置或全部工具日志。
 
-视频与对话作为附件单独交付，不向公共 Git 仓库提交整份私人会话。SESSION_NOTES.md 是早期摘要，与原始文本导出用途不同。
+按提交者 11 月 9 日要求，最终会话文本与 Demo 均放入本仓库 docs/，可从仓库直接查看或下载。SESSION_NOTES.md 是早期摘要，与原始文本导出用途不同。
 
 ## 复核
 
