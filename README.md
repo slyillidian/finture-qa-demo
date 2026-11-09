@@ -2,7 +2,7 @@
 
 面向 Flutter iOS 开发者的本地 Deep Link 回归工具。将重复的“终止/启动 App → 打开链接 → 核对页面与参数”固化成可重复执行的用例。运行时不使用 AI、不需要 API Key。
 
-项目正在开发中；进展与实际验证见 JOURNAL.md。示例 App 是可控验证对象，不代表已有真实用户或线上收益。
+当前为面试作业交付版本；进展与实际验证见 JOURNAL.md。示例 App 是可控验证对象，不代表已有真实用户或线上收益。
 
 ## 首版范围
 
@@ -17,6 +17,7 @@ macOS、完整 Xcode（含 iOS Simulator runtime）、Flutter、Python 3.9+。CL
 
 ```sh
 export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
+xcrun simctl list devices available  # 查找可用模拟器及其 UDID
 cd example
 flutter pub get
 flutter build ios --simulator --debug --dart-define=QA_PROBE=true
@@ -42,7 +43,7 @@ cd example && flutter test
 
 ## AI 协作与交付
 
-AI 实质参与核心 App、CLI、测试和文档的编写；人工负责范围判断与验收。JOURNAL.md 仅记录实际发生的过程，不预填未来日期。evidence/ 保存协作摘要，不能代替原始 AI 会话记录；最终需另行导出/保存真实会话及录制 30 秒～2 分钟 Demo。
+AI 实质参与核心 App、CLI、测试和文档的编写；人工负责范围判断与验收。JOURNAL.md 仅记录实际发生的过程，不预填未来日期。evidence/ 保存开发证据及早期协作摘要；最终原始会话见 [docs/ai-session/conversation.md](docs/ai-session/conversation.md)，约 63 秒 Demo 见 [docs/Link-Probe-Demo.mp4](docs/Link-Probe-Demo.mp4)。
 
 ## 首次运行与路由约定
 

@@ -11,7 +11,7 @@
 3. 打开生成的 report.md 预览：每条用例的截图和预期/实际结果。
 4. 执行 cases/ui-negative-control.json：预期退出码 1，证明探针通过不能掩盖 UI 不匹配。此用例故意配置错误 UI 预期，不是线上事故。
 5. 查看 evidence/ui-assertions-2026-11-08.json 与 ui-rendering-fault.png：开发中还实际构建过只改坏页面显示、保持探针正确的版本，工具正确识别。正常源码已还原。
-6. 查看 JOURNAL.md、完整 Git 历史，以及单独交付的原始 AI 对话文本。
+6. 查看 JOURNAL.md、完整 Git 历史，以及 [docs/ai-session/conversation.md](ai-session/conversation.md) 中的原始 AI 对话文本。
 
 ## 已有证据
 
